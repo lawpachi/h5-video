@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <title>h5视频</title>
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<style>
+    .videoBox {
+        position: relative;
+        overflow: hidden;
+        background-color: #CCCCCC;
+        display: flex;
+        flex-direction: column
+    }
+
+    .videoSource {
+        width: 100%;
+    }
+
+    .playImg {
+        width: 40px;
+        height: 40px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+    video::-webkit-media-controls-start-playback-button {
+            display: none;
+    }
+    .control {
+        width: 100%;
+        height: 2rem;
+        line-height: 2rem;
+        color: #ffffff;
+        background-color: rgba(0, 0, 0, .35);
+        display: flex;
+        position: absolute;
+        bottom: 0;
+        
+    }
+
+    .control>* {
+        flex: 1;
+    }
+
+    .control>*:nth-child(2) {
+        flex: 5;
+    }
+
+    .control>*:nth-child(3) {
+        flex: 2;
+        text-align: center;
+    }
+
+    .control .progressBar {
+        margin: .75rem 2%;
+        position: relative;
+        width: 90%;
+        height: .5rem;
+        background-color: rgba(200, 200, 200, .55);
+        border-radius: 10px;
+       
+    }
+    .timeBar {
+        width: 0%;
+        height: 100%;
+        background-color: #414141;
+        border-radius: 10px;
+    }
+    .timeShow {
+        font-size: .5rem;
+        margin-right: .5rem;
+    }
+    .switch {
+        cursor: pointer;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<body>
+    <div class="videoBox">
+        <video class="videoSource" ontimeupdate="updateVid(this)">
+            <source src="http://www.zhangxinxu.com/study/media/cat.mp4" type="video/mp4">
+            <source>
+        </video>
+        <div class="control">
+            <i class="switch fa fa-play" onclick="playVid()"></i>
+            <div class="progressBar" onclick="jumpVid(event)">
+                <div class="timeBar"></div>
+            </div>
+            <div class="timeShow"><span class="current">00:00:00</span>/<span class="duration">00:00:00</span></div>
+            <div class="fillBox"><span class="fill">全屏</span></div>
+        </div>
+    </div>
+    <script>
+        var video = document.getElementsByClassName('videoSource')[0];
+        var switchBtn = document.getElementsByClassName('switch')[0];
+        var currentDom = document.querySelector('.current');
+        var durationDom = document.querySelector('.duration');
+        var pre = document.querySelector('.timeBar');
+        var duration = 0;
+        var current = 0;
+        video.ondurationchange = function () {
+            duration = video.duration;
+            durationDom.innerHTML = getFormatTime(duration);
+        }
+        function getFormatTime(time) {
+            var time = time || 0;
+
+            var h = parseInt(time / 3600),
+                m = parseInt(time % 3600 / 60),
+                s = parseInt(time % 60);
+            h = h < 10 ? "0" + h : h;
+            m = m < 10 ? "0" + m : m;
+            s = s < 10 ? "0" + s : s;
+
+            return h + ":" + m + ":" + s;
+        }
+        function updateVid(event) {
+            current = event.currentTime
+            currentDom.innerHTML = getFormatTime(current);
+            pre.style.width = current / duration * 100 + '%';
+        }
+        function jumpVid(e) {
+            var event = e || window.event;
+            video.currentTime = (event.offsetX / event.target.offsetWidth) * video.duration;
+        }
+        function playVid() {
+            if (video.paused) {
+                video.play();
+                console.log('我在播放')
+                switchBtn.setAttribute('class', 'switch fa fa-pause')
+            } else {
+                video.pause();
+                switchBtn.setAttribute('class', 'switch fa fa-play')
+            }
+
+        }
+    </script>
+</body>
+
+</html>
