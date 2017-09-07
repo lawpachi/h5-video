@@ -19,18 +19,10 @@
         width: 100%;
     }
 
-    .playImg {
-        width: 40px;
-        height: 40px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        -webkit-transform: translate(-50%, -50%);
-        transform: translate(-50%, -50%);
-    }
     video::-webkit-media-controls-start-playback-button {
-            display: none;
+        display: none;
     }
+
     .control {
         width: 100%;
         height: 2rem;
@@ -40,7 +32,6 @@
         display: flex;
         position: absolute;
         bottom: 0;
-        
     }
 
     .control>* {
@@ -63,18 +54,20 @@
         height: .5rem;
         background-color: rgba(200, 200, 200, .55);
         border-radius: 10px;
-       
     }
+
     .timeBar {
         width: 0%;
         height: 100%;
         background-color: #414141;
         border-radius: 10px;
     }
+
     .timeShow {
         font-size: .5rem;
         margin-right: .5rem;
     }
+
     .switch {
         cursor: pointer;
         justify-content: center;
@@ -85,13 +78,13 @@
 
 <body>
     <div class="videoBox">
-        <video class="videoSource" ontimeupdate="updateVid(this)">
+        <video class="videoSource" webkit-playsinline playsinline>
             <source src="http://www.zhangxinxu.com/study/media/cat.mp4" type="video/mp4">
             <source>
         </video>
         <div class="control">
-            <i class="switch fa fa-play" onclick="playVid()"></i>
-            <div class="progressBar" onclick="jumpVid(event)">
+            <i class="switch fa fa-play"></i>
+            <div class="progressBar">
                 <div class="timeBar"></div>
             </div>
             <div class="timeShow"><span class="current">00:00:00</span>/<span class="duration">00:00:00</span></div>
@@ -99,49 +92,107 @@
         </div>
     </div>
     <script>
-        var video = document.getElementsByClassName('videoSource')[0];
-        var switchBtn = document.getElementsByClassName('switch')[0];
-        var currentDom = document.querySelector('.current');
-        var durationDom = document.querySelector('.duration');
-        var pre = document.querySelector('.timeBar');
-        var duration = 0;
-        var current = 0;
-        video.ondurationchange = function () {
-            duration = video.duration;
-            durationDom.innerHTML = getFormatTime(duration);
-        }
-        function getFormatTime(time) {
-            var time = time || 0;
+        (function () {
+            //如果没有触摸事件 判定为PC  
+            var ua = navigator.userAgent.toLowerCase();
+            var isTocuh = ("ontouchstart" in window) || (ua.indexOf("touch") !== -1) || (ua.indexOf("mobile") !== -1);
+            if(!isTocuh) {
+                alert('请使用移动端测试')
+            }
+            var video = document.getElementsByClassName('videoSource')[0];
+            var switchBtn = document.getElementsByClassName('switch')[0];
+            var currentDom = document.querySelector('.current');
+            var durationDom = document.querySelector('.duration');
+            var progressBar = document.querySelector('.progressBar');
+            var fillDom = document.querySelector('.fillBox');
+            var pre = document.querySelector('.timeBar');
+            var duration = 0;
+            var current = 0;
+            // 解决css阻塞js执行的影响
+            if (video.duration) {
+                initControl();
+            }
+            // 初始化进度条
+            function initControl() {
+                duration = video.duration;
+                durationDom.innerHTML = getFormatTime(duration);
+            }
+            // 视频播放更新进度条
+            function updateVid(event) {
+                current = event.target.currentTime
+                currentDom.innerHTML = getFormatTime(current);
+                pre.style.width = current / duration * 100 + '%';
+            }
+            // 播放或者暂停
+            function playVid() {
+                if (video.paused) {
+                    video.play();
+                    switchBtn.setAttribute('class', 'switch fa fa-pause')
+                } else {
+                    video.pause();
+                    switchBtn.setAttribute('class', 'switch fa fa-play')
+                }
+            }
+            // 全屏播放
+            function fullScreen() {
+                if (video.webkitSupportsFullscreen) {
+                    video.webkitEnterFullscreen();
+                } else {
+                    video.webkitRequestFullScreen();
+                }
+            }
+            // 鼠标点击快进或者后退
+            function jumpVid(e) {
+                var event = e || window.event;
+                video.currentTime = (event.offsetX / event.target.offsetWidth) * video.duration;
+            }
+            function videoPlayer() {
+                this.init();
+            }
+            videoPlayer.prototype.init = function () {
+                bindEvent(video, "canplay", initControl)
+                bindEvent(switchBtn, "click", playVid)
+                bindEvent(video, "timeupdate", updateVid)
+                bindEvent(progressBar, "click", jumpVid)
+                bindEvent(fillDom, "click", jumpVid)
 
-            var h = parseInt(time / 3600),
-                m = parseInt(time % 3600 / 60),
-                s = parseInt(time % 60);
-            h = h < 10 ? "0" + h : h;
-            m = m < 10 ? "0" + m : m;
-            s = s < 10 ? "0" + s : s;
 
-            return h + ":" + m + ":" + s;
-        }
-        function updateVid(event) {
-            current = event.currentTime
-            currentDom.innerHTML = getFormatTime(current);
-            pre.style.width = current / duration * 100 + '%';
-        }
-        function jumpVid(e) {
-            var event = e || window.event;
-            video.currentTime = (event.offsetX / event.target.offsetWidth) * video.duration;
-        }
-        function playVid() {
-            if (video.paused) {
-                video.play();
-                console.log('我在播放')
-                switchBtn.setAttribute('class', 'switch fa fa-pause')
-            } else {
-                video.pause();
-                switchBtn.setAttribute('class', 'switch fa fa-play')
+            }
+            new videoPlayer();
+            // 工具函数
+            function getFormatTime(time) {
+                var time = time || 0;
+
+                var h = parseInt(time / 3600),
+                    m = parseInt(time % 3600 / 60),
+                    s = parseInt(time % 60);
+                h = h < 10 ? "0" + h : h;
+                m = m < 10 ? "0" + m : m;
+                s = s < 10 ? "0" + s : s;
+
+                return h + ":" + m + ":" + s;
+            }
+            // 事件绑定函数
+            function bindEvent(ele, eventName, func) {
+                if (window.addEventListener) {
+                    ele.addEventListener(eventName, func);
+                }
+                else {
+                    ele.attachEvent('on' + eventName, func);
+                }
             }
 
-        }
+        })()
+    </script>
+    <script>
+        // <![CDATA[
+
+        thisURL = document.URL;
+        strwrite =
+            "<img src='https://chart.googleapis.com/chart?cht=qr&chs=150x150&choe=UTF-8&chld=L|4&chl="
+            + thisURL + "' width='150' height='150' alt='网址URL 二维码生成' />";
+        document.write(strwrite);
+      // ]]>
     </script>
 </body>
 
