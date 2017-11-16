@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        .box {
+            height: 100vh;
+            width: 100vw;
+            background: linear-gradient(to top, orange, green);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box" onclick="rotClick()">
+
+    </div>
+    <script>
+        var box = document.querySelector('.box')
+        function rotClick() {
+            box.style.transform = 'rotate(90deg)';
+            box.style.width = '100vh';
+            box.style.height = '100vw';
+        }
+    </script>
+</body>
+
+</html>

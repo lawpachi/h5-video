@@ -4,19 +4,28 @@
 <head>
     <meta charset="utf-8" name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
     <title>h5视频</title>
-    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <style>
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+    }
+
     .videoBox {
         position: relative;
         overflow: hidden;
         background-color: #CCCCCC;
         display: flex;
-        flex-direction: column
+        height: 100%;
+        flex-direction: column;
+        -webkit-transform-origin: center center;
     }
 
     .videoSource {
         width: 100%;
+        object-fit: contain;
+        -webkit-transform-origin: center center;
     }
 
     video::-webkit-media-controls-start-playback-button {
@@ -96,9 +105,10 @@
             //如果没有触摸事件 判定为PC  
             var ua = navigator.userAgent.toLowerCase();
             var isTocuh = ("ontouchstart" in window) || (ua.indexOf("touch") !== -1) || (ua.indexOf("mobile") !== -1);
-            if(!isTocuh) {
+            if (!isTocuh) {
                 alert('请使用移动端测试')
             }
+            var videoBox = document.getElementsByClassName('videoBox')[0];
             var video = document.getElementsByClassName('videoSource')[0];
             var switchBtn = document.getElementsByClassName('switch')[0];
             var currentDom = document.querySelector('.current');
@@ -135,11 +145,24 @@
             }
             // 全屏播放
             function fullScreen() {
-                if (video.webkitSupportsFullscreen) {
-                    video.webkitEnterFullscreen();
-                } else {
-                    video.webkitRequestFullScreen();
-                }
+                var info = [
+                    document.documentElement.clientWidth || document.body.clientWidth,
+                    document.documentElement.clientHeight || document.body.clientHeigth
+                ],
+                    w = info[0],
+                    h = info[1],
+                    cha = Math.abs(h - w) / 2;
+                videoBox.style.transform = 'translate(-' + cha + 'px,' + cha + 'px) rotate(90deg)';
+                video.style.transform = 'rotate(90deg)';
+                videoBox.style.width = '100vh';
+                videoBox.style.height = '100vw';
+                video.style.width = '100vh';
+                video.style.height = '100vw'
+                // if (video.webkitSupportsFullscreen) {
+                //     video.webkitEnterFullscreen();
+                // } else {
+                //     video.webkitRequestFullScreen();
+                // }
             }
             // 鼠标点击快进或者后退
             function jumpVid(e) {
@@ -154,7 +177,7 @@
                 bindEvent(switchBtn, "click", playVid)
                 bindEvent(video, "timeupdate", updateVid)
                 bindEvent(progressBar, "click", jumpVid)
-                bindEvent(fillDom, "click", jumpVid)
+                bindEvent(fillDom, "click", fullScreen)
 
 
             }
@@ -187,11 +210,11 @@
     <script>
         // <![CDATA[
 
-        thisURL = document.URL;
-        strwrite =
-            "<img src='https://chart.googleapis.com/chart?cht=qr&chs=150x150&choe=UTF-8&chld=L|4&chl="
-            + thisURL + "' width='150' height='150' alt='网址URL 二维码生成' />";
-        document.write(strwrite);
+        // thisURL = document.URL;
+        // strwrite =
+        //     "<img src='https://chart.googleapis.com/chart?cht=qr&chs=150x150&choe=UTF-8&chld=L|4&chl="
+        //     + thisURL + "' width='150' height='150' alt='网址URL 二维码生成' />";
+        // document.write(strwrite);
       // ]]>
     </script>
 </body>
